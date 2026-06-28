@@ -75,7 +75,8 @@ Background: none, or tight semi-transparent pill if legibility requires it
 Position: lower third, above 10% bottom safe zone
 Font size: medium (target 52-64px at 1080x1920)
 Color: headline
-Text: [transformation_line] (truncate to one short phrase if needed)
+Text: [transformation_line]
+Note: truncate to one short phrase if needed
 Background: none
 ```
 
