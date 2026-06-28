@@ -1,0 +1,17 @@
+{
+  "account_name": "Sparkle Home Cleaning",
+  "service": "cleaning",
+  "service_descriptor": "premium cleaning service",
+  "hero_price": 99,
+  "benefit_line": "relax and enjoy your weekend",
+  "sweetener": "30% off your next service for new customers",
+  "transformation_line": "we change the vibe of your home",
+  "trust_line": "helping homeowners for over 20 years",
+  "cta": "Book now, tap below",
+  "brand_colors": {
+    "headline": "#1A1A1A",
+    "accent": "#2E7D32"
+  },
+  "setting": "modern white kitchen",
+  "background_action": "two cleaners wiping counters in yellow gloves"
+}

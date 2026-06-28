@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ad Account Config",
+  "description": "One local-services ad account. Supplies the ingredients that a pattern card arranges into a finished ad.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "account_name",
+    "service",
+    "service_descriptor",
+    "hero_price",
+    "benefit_line",
+    "sweetener",
+    "transformation_line",
+    "trust_line",
+    "cta",
+    "brand_colors",
+    "setting",
+    "background_action"
+  ],
+  "properties": {
+    "account_name": {
+      "type": "string",
+      "description": "Client or brand name for this account.",
+      "examples": ["Sparkle Home Cleaning"]
+    },
+    "service": {
+      "type": "string",
+      "description": "Short service category in plain words.",
+      "examples": ["cleaning", "garage door", "gutters"]
+    },
+    "service_descriptor": {
+      "type": "string",
+      "description": "How the service is named on screen and in the read.",
+      "examples": ["premium cleaning service"]
+    },
+    "hero_price": {
+      "type": "number",
+      "description": "The single hero price shown identically in every beat. Number only, no currency symbol.",
+      "examples": [99]
+    },
+    "benefit_line": {
+      "type": "string",
+      "description": "The payoff for the customer in plain spoken words.",
+      "examples": ["relax and enjoy your weekend"]
+    },
+    "sweetener": {
+      "type": "string",
+      "description": "The extra offer that pushes action. Must be defensible for this account.",
+      "examples": ["30% off your next service for new customers"]
+    },
+    "transformation_line": {
+      "type": "string",
+      "description": "The before to after change the service delivers.",
+      "examples": ["we change the vibe of your home"]
+    },
+    "trust_line": {
+      "type": "string",
+      "description": "Credibility or proof line. Must be true for this account.",
+      "examples": ["helping homeowners for over 20 years"]
+    },
+    "cta": {
+      "type": "string",
+      "description": "The action you want the viewer to take.",
+      "examples": ["Book now, tap below"]
+    },
+    "brand_colors": {
+      "type": "object",
+      "description": "Hex colors for on-screen text.",
+      "additionalProperties": false,
+      "required": ["headline", "accent"],
+      "properties": {
+        "headline": {
+          "type": "string",
+          "description": "Headline text color as a six digit hex value.",
+          "pattern": "^#([0-9a-fA-F]{6})$",
+          "examples": ["#1A1A1A"]
+        },
+        "accent": {
+          "type": "string",
+          "description": "Accent color for price and CTA emphasis as a six digit hex value.",
+          "pattern": "^#([0-9a-fA-F]{6})$",
+          "examples": ["#2E7D32"]
+        }
+      }
+    },
+    "setting": {
+      "type": "string",
+      "description": "Where the talent clip is shot. Describes the background scene.",
+      "examples": ["modern white kitchen"]
+    },
+    "background_action": {
+      "type": "string",
+      "description": "What is happening behind the talker. Service should be obvious in the first second.",
+      "examples": ["two cleaners wiping counters in yellow gloves"]
+    }
+  }
+}

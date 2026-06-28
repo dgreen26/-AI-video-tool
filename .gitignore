@@ -1,0 +1,24 @@
+# Generated media, do not commit
+/assets/*
+/output/*
+!assets/.gitkeep
+!output/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Environment and secrets
+.env
+.env.*
+*.key
+
+# OS and editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
