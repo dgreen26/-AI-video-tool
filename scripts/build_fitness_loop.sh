@@ -11,8 +11,9 @@
 #   2. ./scripts/build_fitness_loop.sh
 #   3. Output lands at output/fitness-loop-v1.mp4
 #
-# Requires ffmpeg on PATH. If your box has no bold sans-serif font at the
-# path below, set FONT=/path/to/your/Bold.ttf before running.
+# Requires ffmpeg (built with libass) on PATH and a "DejaVu Sans" or other
+# bold sans-serif family findable by fontconfig. Override the family with
+# FONT_FAMILY=... if you don't have DejaVu Sans installed.
 
 set -euo pipefail
 
@@ -23,26 +24,7 @@ OUT="$ROOT/output/fitness-loop-v1.mp4"
 
 mkdir -p "$WORK"
 
-FONT="${FONT:-}"
-if [ -z "$FONT" ]; then
-    for candidate in \
-        /usr/share/fonts/truetype/dejavu/DejaVu-Sans-Bold.ttf \
-        /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf \
-        /usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf \
-        /System/Library/Fonts/Supplemental/Arial\ Bold.ttf \
-        /Library/Fonts/Arial\ Bold.ttf \
-        /usr/share/fonts/truetype/msttcorefonts/Arial_Bold.ttf; do
-        if [ -f "$candidate" ]; then
-            FONT="$candidate"
-            break
-        fi
-    done
-fi
-if [ -z "$FONT" ]; then
-    echo "No bold sans-serif font found. Set FONT=/path/to/Bold.ttf and re-run." >&2
-    exit 1
-fi
-echo "Using font: $FONT"
+FONT_FAMILY="${FONT_FAMILY:-DejaVu Sans}"
 
 W=1080
 H=1920
@@ -54,13 +36,39 @@ BEATS=(
     "beat1_tired.mp4|FEEL TIRED?|DO IT ANYWAY.|2.4"
     "beat2_shoes.mp4|WANT TO QUIT?|DO ONE MORE REP.|2.4"
     "beat3_runner.mp4|THINK YOU CAN'T PUSH FURTHER?|KEEP GOING.|2.4"
-    "beat4_lift.mp4|YOUR BIGGEST OPPONENT?|IT'S NOT THE COMPETITION. IT'S YOUR OWN MIND.|2.6"
+    "beat4_lift.mp4|YOUR BIGGEST OPPONENT?|IT'S NOT THE COMPETITION.\\NIT'S YOUR OWN MIND.|2.6"
     "beat5_plates.mp4|IGNORE THE WHISPERS OF WEAKNESS.|WIN THE WAR WITHIN.|2.6"
 )
 
-esc() {
-    # Escape text for ffmpeg drawtext: backslash, colon, single quote.
-    printf '%s' "$1" | sed -e "s/\\\\/\\\\\\\\/g" -e "s/:/\\\\:/g" -e "s/'/\\\\'/g"
+write_ass() {
+    # $1 = output .ass path, $2 = top text, $3 = bottom text, $4 = duration
+    local path="$1" top="$2" bottom="$3" dur="$4"
+    local top_y=$(python3 -c "print(int(${HALF}*0.42))")
+    local bot_y=$(python3 -c "print(int(${HALF}+${HALF}*0.42))")
+    local end
+    end=$(python3 -c "
+d = $dur
+h = int(d // 3600)
+m = int((d % 3600) // 60)
+s = d % 60
+print(f'{h}:{m:02d}:{s:05.2f}')
+")
+    cat > "$path" <<EOF
+[Script Info]
+ScriptType: v4.00+
+PlayResX: ${W}
+PlayResY: ${H}
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,${FONT_FAMILY},64,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,4,0,5,20,20,20,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.00,${end},Default,,0,0,0,,{\\pos(540,${top_y})}${top}
+Dialogue: 0,0:00:00.00,${end},Default,,0,0,0,,{\\pos(540,${bot_y})}${bottom}
+EOF
 }
 
 SEGMENTS=()
@@ -75,8 +83,9 @@ for row in "${BEATS[@]}"; do
         exit 1
     fi
 
-    top_esc="$(esc "$top")"
-    bottom_esc="$(esc "$bottom")"
+    assfile="$WORK/beat${i}.ass"
+    write_ass "$assfile" "$top" "$bottom" "$dur"
+
     seg="$WORK/beat${i}_final.mp4"
     SEGMENTS+=("$seg")
 
@@ -97,13 +106,7 @@ for row in "${BEATS[@]}"; do
              hue=s=0,
              format=yuv420p[bot];
         [top][bot]vstack=inputs=2[stacked];
-        [stacked]drawtext=fontfile='${FONT}':text='${top_esc}':
-             fontcolor=white:fontsize=64:borderw=4:bordercolor=black:
-             x=(w-text_w)/2:y=${HALF}*0.42-text_h/2:line_spacing=8,
-        drawtext=fontfile='${FONT}':text='${bottom_esc}':
-             fontcolor=white:fontsize=64:borderw=4:bordercolor=black:
-             x=(w-text_w)/2:y=${HALF}+${HALF}*0.42-text_h/2:line_spacing=8,
-        fps=${FPS}[v]
+        [stacked]ass='${assfile}',fps=${FPS}[v]
     " -map "[v]" -an -c:v libx264 -pix_fmt yuv420p -crf 18 "$seg"
 done
 
